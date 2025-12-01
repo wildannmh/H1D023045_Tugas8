@@ -1,95 +1,213 @@
 <h1>Nama: Wildan Munawwar Habib<br>
 NIM: H1D023045</h1>
 
-## Fitur Utama & Penjelasan Kode
+---
 
-### 1. Halaman Login (`LoginPage`)
+Aplikasi ini memiliki fitur **Login, Registrasi, dan CRUD Produk (Create, Read, Update, Delete)** menggunakan Flutter.
 
-<img width="437" height="1009" alt="image" src="https://github.com/user-attachments/assets/6659e6c1-a4de-49c2-9c12-1f4229060502" />
+# 1. Halaman Login
 
-**Penjelasan Kode (`login_page.dart`):**
-- **State Management:** Menggunakan `StatefulWidget` karena ada perubahan state pada form input.
-- **Validasi:** Menggunakan `GlobalKey<FormState>` untuk memvalidasi bahwa kolom email dan password tidak boleh kosong sebelum tombol ditekan.
-- **Obscure Text:** Pada kolom password, properti `obscureText: true` diaktifkan agar karakter sandi tidak terlihat.
-- **Navigasi:** - Tombol **Login** memproses input user.
-  - Teks **Registrasi** menggunakan widget `InkWell` untuk navigasi ke halaman `RegistrasiPage`.
+### Screenshot
+
+<img width="434" height="991" alt="image" src="https://github.com/user-attachments/assets/9434d731-6250-4049-9433-8747712780c1" />
+
+### Penjelasan
+
+* Menggunakan `Form` + `TextFormField`.
+* Validasi memastikan email & password tidak kosong.
+* Tombol **Login** memanggil fungsi dari `LoginBloc`.
+* Tautan **Register** menuju halaman registrasi.
+
+### Potongan Kode (login_page.dart)
+
+```dart
+final formKey = GlobalKey<FormState>();
+
+if (formKey.currentState!.validate()) {
+  LoginBloc.login(
+    email: _emailController.text,
+    password: _passwordController.text,
+  );
+}
+```
 
 ---
 
-### 2. Halaman Registrasi (`RegistrasiPage`)
+# 2. Halaman Registrasi
 
-<img width="438" height="1007" alt="image" src="https://github.com/user-attachments/assets/a4b9928a-37ba-4e9c-986b-317537d191f6" />
+### Screenshot
 
-**Penjelasan Kode (`registrasi_page.dart`):**
-- **Controller:** Menggunakan `TextEditingController` untuk menangkap input nama, email, dan password.
-- **Validasi Lanjutan:**
-  - **Email:** Menggunakan **RegEx (Regular Expression)** untuk memastikan format email valid (mengandung `@` dan domain).
-  - **Password:** Minimal input harus 6 karakter.
-  - **Konfirmasi Password:** Memastikan input password kedua sama persis dengan password pertama.
-- **Form:** Semua input dibungkus dalam widget `Form` untuk memudahkan pengecekan validitas data secara bersamaan.
+<img width="433" height="996" alt="image" src="https://github.com/user-attachments/assets/babaa199-440c-42ac-8f33-1450b9ea7107" />
 
----
+### Penjelasan
 
-### 3. Halaman Daftar Produk (`ProdukPage`)
-Halaman yang menampilkan seluruh daftar produk yang tersedia.
+* Validasi format email menggunakan RegEx.
+* Password minimal 6 karakter.
+* Form memastikan password & konfirmasi password sama.
 
-<img width="438" height="1014" alt="image" src="https://github.com/user-attachments/assets/9f8d6f32-d8a9-441a-9849-82ba8588e2dc" />
+### Potongan Kode
 
-**Penjelasan Kode (`produk_page.dart`):**
-- **ListView:** Menggunakan widget `ListView` untuk menampilkan daftar produk yang bisa di-scroll.
-- **Model Integration:** Data yang ditampilkan diambil dari model `Produk` (contoh: Kamera, Kulkas, Mesin Cuci).
-- **Navigation Drawer:** Terdapat sidebar (Drawer) di sebelah kiri yang berisi opsi **Logout**.
-- **GestureDetector:** Setiap item produk dibungkus `GestureDetector` agar bisa diklik dan mengarahkan pengguna ke halaman `ProdukDetail`.
-- **Floating Action/AppBar Action:** Terdapat ikon `+` di pojok kanan atas untuk menavigasi ke halaman `ProdukForm` (Tambah Data).
+```dart
+if (_passwordController.text != _confirmPassController.text) {
+  return "Password tidak sama";
+}
+```
 
 ---
 
-### 4. Halaman Detail Produk (`ProdukDetail`)
-Menampilkan informasi rinci mengenai satu produk tertentu.
+# 3. Halaman Daftar Produk (Home)
 
-<img width="435" height="1007" alt="image" src="https://github.com/user-attachments/assets/372ea7c5-a396-4bed-a9f0-7a10eeb787db" />
+### Screenshot
 
-**Penjelasan Kode (`produk_detail.dart`):**
-- **Passing Data:** Halaman ini menerima objek `Produk` dari halaman sebelumnya melalui constructor, lalu menampilkannya (Kode, Nama, Harga).
-- **Edit & Delete:**
-  - Tombol **EDIT** akan mengarahkan ke `ProdukForm` dengan membawa data produk saat ini.
-  - Tombol **DELETE** memicu fungsi `confirmHapus()`.
-- **Alert Dialog:** Fungsi `confirmHapus()` memunculkan popup konfirmasi. Jika user memilih "Ya", aplikasi memanggil `ProdukBloc.deleteProduk(id)` untuk menghapus data di server.
+<img width="429" height="993" alt="image" src="https://github.com/user-attachments/assets/5f6bc4d3-a2f8-4ebb-8c42-9b2dbedfb454" />
+
+### Penjelasan
+
+* Menggunakan `ListView.builder()` menampilkan produk.
+* Terdapat **Drawer** untuk logout.
+* Tombol `+` menuju halaman Tambah Produk.
+* Tekan item → menuju halaman **Detail Produk**.
+
+### Potongan Kode
+
+```dart
+ListView.builder(
+  itemCount: snapshot.data!.length,
+  itemBuilder: (context, index) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context,
+          MaterialPageRoute(builder: (context) =>
+            ProdukDetail(produk: snapshot.data![index])
+          )
+        );
+      },
+    );
+  },
+);
+```
 
 ---
 
-### 5. Halaman Form Produk (`ProdukForm`)
-Halaman ini bersifat dinamis (Reusable), digunakan baik untuk **Menambah Produk Baru** maupun **Mengedit Produk Lama**.
+# 4. Halaman Detail Produk
 
-<img width="438" height="1005" alt="image" src="https://github.com/user-attachments/assets/e6b41a2a-afaf-417e-8c7c-e573b0fad2a8" />
-<img width="436" height="1012" alt="image" src="https://github.com/user-attachments/assets/7d603f95-4925-42d5-aaeb-1e12110006c4" />
+### Screenshot
 
-**Penjelasan Kode (`produk_form.dart`):**
-- **Logika `isUpdate()`:** - Fungsi ini dijalankan saat `initState`.
-  - Jika `widget.produk` tidak null (ada data dikirim), mode berubah menjadi **UBAH** (Judul: "UBAH PRODUK", tombol: "UBAH", kolom terisi data lama).
-  - Jika null, mode menjadi **TAMBAH** (Judul: "TAMBAH PRODUK", tombol: "SIMPAN", kolom kosong).
-- **Input Type:** Kolom harga menggunakan `keyboardType: TextInputType.number` agar keyboard yang muncul khusus angka.
+<img width="435" height="996" alt="image" src="https://github.com/user-attachments/assets/263baeae-9fbb-4fe8-95d2-fc5fad8dad2f" />
+
+### Penjelasan
+
+* Data produk diterima lewat constructor.
+* Tombol **Edit** → membuka form dengan data lama.
+* Tombol **Delete** → membuka popup konfirmasi.
 
 ---
 
-## Struktur Folder Project
+# 5. Halaman Form Produk (Tambah & Edit)
 
-```text
+### Screenshot Mode Tambah
+
+<img width="433" height="992" alt="image" src="https://github.com/user-attachments/assets/3802eead-6393-40ba-94a4-9fd81da0ff83" />
+
+### Screenshot Mode Edit
+
+<img width="433" height="990" alt="image" src="https://github.com/user-attachments/assets/8fa5454e-9a87-4b23-9786-827134754bc2" />
+
+### Penjelasan
+
+* Halaman ini **reusable**, untuk Tambah & Edit sekaligus.
+* Jika `produk != null` maka halaman otomatis masuk **mode edit**.
+
+### Logika Cek Mode Edit/Tambah
+
+```dart
+bool isUpdate = widget.produk != null;
+
+if (isUpdate) {
+  kodeController.text = widget.produk!.kode!;
+  namaController.text = widget.produk!.nama!;
+  hargaController.text = widget.produk!.harga.toString();
+}
+```
+
+---
+
+# Popup Berhasil
+
+### Screenshot
+
+<img width="434" height="999" alt="image" src="https://github.com/user-attachments/assets/647765c3-cd78-4496-91df-d8a5afa54e4c" />
+
+**Kode Handler Response:**
+
+```dart
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) => SuccessDialog(
+      description: "Registrasi berhasil, silahkan login",
+      okClick: () {
+        Navigator.pop(context);
+      },
+    ),
+  );
+```
+
+---
+
+# Popup Gagal
+
+### Screenshot
+
+<img width="433" height="990" alt="image" src="https://github.com/user-attachments/assets/31f18546-bc21-40f6-bbcb-bcb225db9874" />
+
+**Kode Handler Response:**
+
+```dart
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) => const WarningDialog(
+      description: "Login gagal, silahkan coba lagi",
+    ),
+  );
+```
+
+---
+
+# Popup Konfirmasi Hapus
+
+### Screenshot
+
+<img width="430" height="983" alt="image" src="https://github.com/user-attachments/assets/1001648e-abd3-48a8-a5da-98942ae03620" />
+
+**Kode Handler Response:**
+
+---
+
+# Struktur Folder Project
+
+```
 lib/
 ├── bloc/
-│   └── produk_bloc.dart      # Logika bisnis penghubung UI dan Service
+│   ├── login_bloc.dart
+│   ├── logout_bloc.dart
+│   ├── produk_bloc.dart
+│   └── register_bloc.dart
 ├── model/
-│   ├── login.dart            # Model data untuk respon Login
-│   ├── produk.dart           # Model data untuk objek Produk
-│   └── registrasi.dart       # Model data untuk respon Registrasi
+│   ├── login.dart
+│   ├── produk.dart
+│   └── registrasi.dart
 ├── service/
-│   └── produk_service.dart   # Menangani HTTP Request (API)
+│   └── produk_service.dart
 ├── ui/
-│   ├── login_page.dart       # Tampilan Login
-│   ├── produk_detail.dart    # Tampilan Detail Produk
-│   ├── produk_form.dart      # Tampilan Form (Tambah/Edit)
-│   ├── produk_page.dart      # Tampilan List Produk
-│   └── registrasi_page.dart  # Tampilan Registrasi
+│   ├── login_page.dart
+│   ├── produk_detail.dart
+│   ├── produk_form.dart
+│   ├── produk_page.dart
+│   └── registrasi_page.dart
 ├── widget/
-│   └── warning_dialog.dart   # Widget custom untuk alert
-└── main.dart                 # Entry point aplikasi
+│   ├── success_dialog.dart
+│   └── warning_dialog.dart
+└── main.dart
+```
